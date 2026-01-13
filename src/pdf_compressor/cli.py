@@ -75,7 +75,7 @@ def main(
             help="Quality preset: screen (72dpi), ebook (150dpi), printer (300dpi), prepress",
             case_sensitive=False,
         ),
-    ] = "screen",
+    ] = "ebook",
     jobs: Annotated[
         int,
         typer.Option(

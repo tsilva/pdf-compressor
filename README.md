@@ -104,8 +104,8 @@ compress-pdf -q document.pdf
 
 | Preset | DPI | Use Case |
 |--------|-----|----------|
-| `screen` | 72 | Web viewing, smallest size (default) |
-| `ebook` | 150 | E-readers and tablets |
+| `screen` | 72 | Web viewing, smallest size |
+| `ebook` | 150 | E-readers and tablets (default) |
 | `printer` | 300 | Office printing |
 | `prepress` | 300 | Professional printing |
 
