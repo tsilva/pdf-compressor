@@ -8,3 +8,5 @@ test/
 # Editor
 *.swp
 *~
+
+__pycache__

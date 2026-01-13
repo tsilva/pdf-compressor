@@ -1,6 +1,6 @@
 # pdf-compressor
 
-[![Bash](https://img.shields.io/badge/Bash-4EAA25?logo=gnubash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![Ghostscript](https://img.shields.io/badge/Ghostscript-000000?logo=ghostscript&logoColor=white)](https://www.ghostscript.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub](https://img.shields.io/badge/GitHub-tsilva%2Fpdf--compressor-blue?logo=github)](https://github.com/tsilva/pdf-compressor)
@@ -11,52 +11,53 @@ A reliable PDF compression CLI tool that automatically selects the best compress
 
 Different PDFs respond better to different compression methods. Some are already optimized, others are bloated with high-resolution images. This tool eliminates the guesswork by trying multiple compression strategies and keeping the smallest result.
 
-The tool is fast, scriptable, and works great for batch processing. It supports single files, wildcards, custom output directories, and in-place replacement.
+The tool is fast, scriptable, and works great for batch processing. It supports single files, wildcards, custom output directories, in-place replacement, and parallel processing.
 
 ## Features
 
 - **Smart compression** - Tries 3 strategies and picks the best result
 - **Batch processing** - Compress multiple files with wildcards (`*.pdf`)
+- **Parallel processing** - Compress multiple files concurrently for faster batch operations
 - **Flexible output** - Custom filenames, directories, or in-place replacement
+- **Quality presets** - Choose between screen, ebook, printer, or prepress quality
 - **Cross-platform** - Works on macOS and Linux
 - **Scriptable** - Quiet mode for automation and pipelines
 
 ## Installation
 
-### Dependencies
+### Prerequisites
 
-Install the required tools:
+Install Ghostscript:
 
 ```bash
 # macOS
-brew install ghostscript qpdf
+brew install ghostscript
 
 # Ubuntu/Debian
-apt install ghostscript qpdf
+apt install ghostscript
 
 # Fedora/RHEL
-dnf install ghostscript qpdf
+dnf install ghostscript
 ```
 
-### Install compress-pdf
+### Install with uv (recommended)
+
+```bash
+uv pip install git+https://github.com/tsilva/pdf-compressor.git
+```
+
+### Install with pip
+
+```bash
+pip install git+https://github.com/tsilva/pdf-compressor.git
+```
+
+### Install from source
 
 ```bash
 git clone https://github.com/tsilva/pdf-compressor.git
 cd pdf-compressor
-make install
-```
-
-Or manually copy to your PATH:
-
-```bash
-cp compress-pdf /usr/local/bin/
-chmod +x /usr/local/bin/compress-pdf
-```
-
-To uninstall:
-
-```bash
-make uninstall
+uv pip install -e .
 ```
 
 ## Usage
@@ -77,6 +78,12 @@ compress-pdf *.pdf -d compressed/
 # Replace original files (use with caution)
 compress-pdf -i large.pdf
 
+# Use 4 parallel workers for batch compression
+compress-pdf *.pdf -j 4
+
+# Use ebook quality (150 DPI) instead of screen (72 DPI)
+compress-pdf document.pdf -Q ebook
+
 # Quiet mode (no output except errors)
 compress-pdf -q document.pdf
 ```
@@ -88,9 +95,19 @@ compress-pdf -q document.pdf
 | `-o, --output <file>` | Output filename (single file mode only) |
 | `-d, --output-dir <dir>` | Output directory for compressed files |
 | `-i, --in-place` | Replace original files |
+| `-Q, --quality <preset>` | Quality preset: screen, ebook, printer, prepress |
+| `-j, --jobs <n>` | Number of parallel jobs (0 = auto) |
 | `-q, --quiet` | Suppress output except errors |
-| `-h, --help` | Show help message |
 | `-v, --version` | Show version |
+
+### Quality Presets
+
+| Preset | DPI | Use Case |
+|--------|-----|----------|
+| `screen` | 72 | Web viewing, smallest size (default) |
+| `ebook` | 150 | E-readers and tablets |
+| `printer` | 300 | Office printing |
+| `prepress` | 300 | Professional printing |
 
 ## How It Works
 
@@ -98,9 +115,9 @@ The tool tries three compression strategies and keeps the smallest result:
 
 | Strategy | Method | Best For |
 |----------|--------|----------|
-| **qpdf** | Linearizes and optimizes PDF object streams | Already-optimized PDFs |
-| **Ghostscript** | Aggressive 72 DPI image downsampling | Image-heavy PDFs |
-| **Combined** | Ghostscript followed by qpdf optimization | Mixed content |
+| **pikepdf** | Linearizes and optimizes PDF object streams | Already-optimized PDFs |
+| **Ghostscript** | Aggressive image downsampling | Image-heavy PDFs |
+| **Combined** | Ghostscript followed by pikepdf optimization | Mixed content |
 
 If none of the strategies produce a smaller file, the original is preserved.
 
@@ -118,10 +135,17 @@ Results vary depending on PDF content. Image-heavy PDFs typically see the larges
 
 ```
 pdf-compressor/
-├── compress-pdf     # Main CLI script
-├── Makefile         # Install/uninstall targets
-├── LICENSE          # MIT License
-└── README.md        # This file
+├── pyproject.toml              # Project configuration
+├── src/
+│   └── pdf_compressor/
+│       ├── cli.py              # CLI interface
+│       ├── core/
+│       │   ├── compressor.py   # Main orchestrator
+│       │   └── strategies/     # Compression strategies
+│       ├── parallel/           # Parallel processing
+│       └── utils/              # Utilities
+├── LICENSE                     # MIT License
+└── README.md                   # This file
 ```
 
 ## Reporting Issues
